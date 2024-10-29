@@ -5,3 +5,5 @@ config.h
 build*/
 html/
 __pycache__
+backup_code/
+3dr/scan_result/*
