@@ -107,7 +107,6 @@ base_T_camera = np.array([[ 0.99906299,  0.02242375,  0.03701784,  0.82142274],
  [ 0.,          0.,          0.,          1.        ]]) # Board 2
                           
 
-camera_T_base = np.linalg.inv(base_T_camera)
 
 
 
@@ -144,9 +143,9 @@ robot_states = flexivrdk.RobotStates()
 count = 1
 time.sleep(3)
 
-log.info("Opening gripper")
-gripper.move(0.14, 0.1, 20)
-time.sleep(3)
+# log.info("Opening gripper")
+# gripper.move(0.14, 0.1, 20)
+# time.sleep(3)
 
 
 
