@@ -23,6 +23,8 @@ class Dataset:
         self.data_path = data_path
         self.poses = self.read_txt_file(data_path)
         self.scans = self.read_ply_file(data_path)
+        self.preprocess()
+        self.visualize_all()
         
 
     def __len__(self):
@@ -68,7 +70,7 @@ class Dataset:
             o3d.io.write_point_cloud(clustered_path + '/clustered_'+ str(i+1).zfill(3)+'.ply', pc)
 
 
-    def clustering_process(point_cloud, threshold=0.04, minpoints=20):
+    def clustering_process(point_cloud, threshold, minpoints): #(point_cloud, threshold=0.04, minpoints=20)
 
         pc = copy.deepcopy(point_cloud)
         pcd = o3d.geometry.PointCloud()
@@ -100,7 +102,7 @@ class Dataset:
 
         return clustered_points
     
-    def preprocess(self, threshold=0.1, minpoints=10):
+    def preprocess(self, threshold1=0.1, minpoints1=10):
         real_T_fake = np.array([[1, 0, 0, 0],
                         [0, -1, 0, 0],
                         [0, 0, -1, 0],
@@ -127,7 +129,7 @@ class Dataset:
                                                 (cur_points[:, 1] >= -0.3) & (cur_points[:, 1] <= 0.3) &
                                                 (cur_points[:, 2] >= -0.16) & (cur_points[:, 2] <= 0.3)]
             filtered_points.append(filtered_cur_points)
-            clustered_cur_points = np.array(self.clustering_process(filtered_cur_points, threshold=threshold))
+            clustered_cur_points = np.array(Dataset.clustering_process(filtered_cur_points, threshold=threshold1, minpoints=minpoints1))
             clustered_points.append(clustered_cur_points)
             self.clustered_points = clustered_points
 
@@ -137,7 +139,9 @@ class Dataset:
         all_points = np.vstack(self.clustered_points)
         pc = o3d.geometry.PointCloud()
         pc.points = o3d.utility.Vector3dVector(all_points)
+        self.all_points = all_points
         o3d.visualization.draw_geometries([pc], window_name='All Clustered Points')
+
 
     
 

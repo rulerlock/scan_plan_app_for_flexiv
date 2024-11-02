@@ -35,7 +35,7 @@ from scipy.spatial import cKDTree
 import open3d as o3d
 import numpy as np
 from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QFileDialog, QLabel, QVBoxLayout, QWidget, QLineEdit
-import gripper_init as gripinit
+# import gripper_init as gripinit
 import datareader
 
 class ScanApp(QMainWindow):
@@ -64,10 +64,18 @@ class ScanApp(QMainWindow):
         self.layout.addWidget(self.local_ip_label)
         self.layout.addWidget(self.local_ip_input)
 
+        self.folder_path_label = QLabel("No folder selected")
+        self.layout.addWidget(self.folder_path_label)
+
         # Align button for automatic matching
         self.auto_align_button = QPushButton("Grip Object", self)
         self.auto_align_button.clicked.connect(self.grip_object)
         self.layout.addWidget(self.auto_align_button)
+
+        # Reverse trasnform scan point cloud and visualize result
+        self.view_scan_button = QPushButton("View Scan Result", self)
+        self.view_scan_button.clicked.connect(self.view_scan)
+        self.layout.addWidget(self.view_scan_button)
 
         # Load button
         self.load_button = QPushButton("Load Point Cloud Files", self)
@@ -109,18 +117,26 @@ class ScanApp(QMainWindow):
         app_loop = gripinit.AppLoop(robot_ip, local_ip)
         app_loop.run()
 
+    def view_scan(self):
+        folder_path = QFileDialog.getExistingDirectory(self, "Select Dataset Folder")
+        if folder_path:
+            self.data_path = folder_path
+            self.folder_path_label.setText(f"Selected Folder: {folder_path}")
+            self.dataset = datareader.Dataset(self.data_path)
+
     def load_point_clouds(self):
         # Load two point cloud files
         options = QFileDialog.Options()
         file_name1, _ = QFileDialog.getOpenFileName(self, "Select Ideal Point Cloud", "", "Point Cloud Files (*.ply *.pcd);;All Files (*)", options=options)
         file_name2, _ = QFileDialog.getOpenFileName(self, "Select Scanned Point Cloud", "", "Point Cloud Files (*.ply *.pcd);;All Files (*)", options=options)
         
-        if file_name1 and file_name2:
+        if file_name2: # and file_name1:
             # Read the point clouds
-            self.source = o3d.io.read_point_cloud(file_name1)
+            # self.source = self.dataset.allpoints
+            self.source = o3d.io.read_point_cloud(file_name2)
             self.target = o3d.io.read_point_cloud(file_name2)
-            self.label.setText("Point cloud files loaded, please conduct alignment")
-            o3d.visualization.draw_geometries([self.source, self.target])
+            self.label.setText("Point cloud files loaded, please check the point cloud size")
+            o3d.visualization.draw_geometries([self.source, self.target], window_name="Please check the point cloud size")
             
 
     def pick_points(self, point_cloud):
@@ -163,7 +179,7 @@ class ScanApp(QMainWindow):
             self.source.transform(trans_init)
             self.label.setText("Alignment completed")
             self.diff_button.setEnabled(True)  # Enable difference calculation
-            o3d.visualization.draw_geometries([self.source, self.target])
+            o3d.visualization.draw_geometries([self.source, self.target], window_name="Aligned Point Cloud")
             self.transformation = trans_init
 
         else:
@@ -194,10 +210,12 @@ class ScanApp(QMainWindow):
     #             # o3d.visualization.draw_geometries([self.source, self.target, diff_cloud])
     #             self.label.setText("Difference calculation completed")
     #             # print()/
-    def calculate_difference(self, target, source, threshold=0.1, minpoints=10):
+    def calculate_difference(self, threshold=0.1, minpoints=10):
         if self.source is not None and self.target is not None:
             if self.transformation is not None:
         # closest_mask = find_closest_points(points1, points2, threshold)
+                target = np.asanyarray(self.target.points)
+                source = np.asanyarray(self.source.points)
                 tree = cKDTree(source)
                 distances, indices = tree.query(target)
                 closest_mask = distances < threshold
