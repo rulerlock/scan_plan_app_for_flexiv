@@ -86,15 +86,7 @@ class AppLoop:
         # argparser.add_argument("local_ip", help="IP address of this PC")
         # args = argparser.parse_args()
         # robot = flexivrdk.Robot(args.robot_ip, args.local_ip)
-<<<<<<< HEAD
-        robot = flexivrdk.Robot(robot_ip, local_ip)
-        gripper = flexivrdk.Gripper(robot)
-        gripper_states = flexivrdk.GripperStates()
 
-        time.sleep(2)
-        log = flexivrdk.Log()
-        mode = flexivrdk.Mode
-=======
         self.robot = flexivrdk.Robot(robot_ip, local_ip)
         self.gripper = flexivrdk.Gripper(self.robot)
         self.gripper_states = flexivrdk.GripperStates()
@@ -108,7 +100,6 @@ class AppLoop:
         gripper_states = self.gripper_states
         log = self.log
         mode = self.mode
->>>>>>> ea88e96 (Merge scanning function to UI)
 
         base_T_camera = np.array([[ 0.99906299,  0.02242375,  0.03701784,  0.82142274],
         [-0.03600151, -0.04414769,  0.99837612, -0.33092116],
@@ -159,14 +150,11 @@ class AppLoop:
         # Configure depth and color streams
         pipeline = rs.pipeline()
         config = rs.config()
-<<<<<<< HEAD
-=======
         robot = self.robot
         gripper = self.gripper
         gripper_states = self.gripper_states
         log = self.log
         mode = self.mode
->>>>>>> ea88e96 (Merge scanning function to UI)
 
         # Load the camera configuration from the JSON file      
         with open('./realsense/med_acc.json', 'r') as file:
@@ -493,24 +481,18 @@ class AppLoop:
                 state.scale ^= True
 
             if key == ord("g"):
-<<<<<<< HEAD
                 AppLoop.log.info("Closing gripper")
                 AppLoop.gripper.move(0.11, 0.8, 60) # Gipper parameters: position, force, speed
-=======
-                log.info("Closing gripper")
-                gripper.move(0.11, 0.8, 60) # Gipper parameters: position, force, speed
->>>>>>> ea88e96 (Merge scanning function to UI)
+                # log.info("Closing gripper")
+                # gripper.move(0.11, 0.8, 60) # Gipper parameters: position, force, speed
                 time.sleep(3)
 
 
             if key == ord("d"):
-<<<<<<< HEAD
                 AppLoop.log.info("Opening gripper")
                 AppLoop.gripper.move(0.14, 0.1, 20) # Gipper parameters: position, force, speed
-=======
                 log.info("Opening gripper")
                 gripper.move(0.14, 0.1, 20) # Gipper parameters: position, force, speed
->>>>>>> ea88e96 (Merge scanning function to UI)
                 time.sleep(3)
 
             if key == ord("n"):
@@ -521,8 +503,7 @@ class AppLoop:
 
             if key == ord("s"):
                 # cv2.imwrite('./out.png', out)
-<<<<<<< HEAD
-                AppLoop.robot.setMode(mode.NRT_PRIMITIVE_EXECUTION)
+               AppLoop.robot.setMode(mode.NRT_PRIMITIVE_EXECUTION)
                 AppLoop.robot.executePrimitive("ZeroFTSensor()")
                 AppLoop.log.info("ZeroFTSensor")
                 time.sleep(3)
@@ -530,16 +511,14 @@ class AppLoop:
                 AppLoop.robot.setMode(mode.NRT_PLAN_EXECUTION)
                 AppLoop.log.info("Executing plan")
                 AppLoop.robot.executePlan(22, True)
-=======
-                robot.setMode(mode.NRT_PRIMITIVE_EXECUTION)
-                robot.executePrimitive("ZeroFTSensor()")
-                log.info("ZeroFTSensor")
-                time.sleep(3)
+                # robot.setMode(mode.NRT_PRIMITIVE_EXECUTION)
+                # robot.executePrimitive("ZeroFTSensor()")
+                # log.info("ZeroFTSensor")
+                # time.sleep(3)
 
-                robot.setMode(mode.NRT_PLAN_EXECUTION)
-                log.info("Executing plan")
-                robot.executePlan(22, True)
->>>>>>> ea88e96 (Merge scanning function to UI)
+                # robot.setMode(mode.NRT_PLAN_EXECUTION)
+                # log.info("Executing plan")
+                # robot.executePlan(22, True)
                 time.sleep(3)      
 
             if key in (27, ord("q")) or cv2.getWindowProperty(state.WIN_NAME, cv2.WND_PROP_AUTOSIZE) < 0:

@@ -64,22 +64,32 @@ class ScanApp(QMainWindow):
         self.layout.addWidget(self.local_ip_label)
         self.layout.addWidget(self.local_ip_input)
 
-        # Align button for automatic matching
-        self.auto_align_button = QPushButton("Grip Object", self)
-        self.auto_align_button.clicked.connect(self.grip_object)
-        self.layout.addWidget(self.auto_align_button)
+        # Init robot
+        self.grip_object_button = QPushButton("Grip Object", self)
+        self.grip_object_button.clicked.connect(self.grip_object)
+        self.layout.addWidget(self.grip_object)
 
-        # Load button
+        # Capture point cloud
+        # self.auto_align_button = QPushButton("Capture Point Cloud", self)
+        # self.auto_align_button.clicked.connect(self.grip_object)
+        # self.layout.addWidget(self.grip_object)        
+        
+        # Point cloud alignment
+        self.read_point_cloud_button = QPushButton("View Capture Result", self)
+        self.read_point_cloud_button.clicked.connect(self.read_point_cloud)
+        self.layout.addWidget(self.read_point_cloud)
+
+        # Load CAD model
         self.load_button = QPushButton("Load Point Cloud Files", self)
         self.load_button.clicked.connect(self.load_point_clouds)
         self.layout.addWidget(self.load_button)
 
-        # Align button
+        # CAD matching
         self.align_button = QPushButton("Supervised Alignment", self)
         self.align_button.clicked.connect(self.align_point_clouds)
         self.layout.addWidget(self.align_button)
 
-        # Difference calculation button
+        # Difference calculation
         self.diff_button = QPushButton("Calculate Difference", self)
         self.diff_button.clicked.connect(self.calculate_difference)
         self.diff_button.setEnabled(False)
@@ -108,6 +118,24 @@ class ScanApp(QMainWindow):
         # 启动封装的循环类
         app_loop = gripinit.AppLoop(robot_ip, local_ip)
         app_loop.run()
+
+
+
+    def read_point_cloud(self):
+        # 获取用户输入的IP地址
+        robot_ip = self.robot_ip_input.text()
+        local_ip = self.local_ip_input.text()
+
+        # 检查是否填写了IP
+        if not robot_ip or not local_ip:
+            print("Please enter both robot IP and local IP")
+            return
+        
+        # 启动封装的循环类
+        app_loop = gripinit.AppLoop(robot_ip, local_ip)
+        app_loop.run()
+
+
 
     def load_point_clouds(self):
         # Load two point cloud files
