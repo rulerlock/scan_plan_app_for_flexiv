@@ -177,7 +177,8 @@ def main():
                 print(base_T_hand @ hand_T_tag @ np.linalg.inv(cam_T_tag) @ np.linalg.inv(base_T_camera))
 
             elif user_input == "q":
-                print("Cam intrisics",K)
+                np.savetxt('./3dr/base_T_camera.txt', base_T_cam)
+                print("Pose saved to 3dr/base_T_camera.txt. The Cam intrisics is",K)
                 break
 
 

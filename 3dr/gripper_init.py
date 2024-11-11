@@ -11,9 +11,10 @@ Mouse:
     with right button to translate and the wheel to zoom.
 
 Keyboard: 
+    [d]     Change decimate filter
     [p]     Pause
     [r]     Reset View
-    [d]     Open gripper
+    [o]     Open gripper
     [g]     Close gripper
     [s]     Stabilize robot arm
     [e]     Export points to ply (./out.ply)
@@ -41,14 +42,12 @@ import flexivrdk
 # fmt: on
 
 def append_line_to_txt(filename, line):
-    # 打开文件，如果文件不存在则创建
     with open(filename, 'a+') as file:
-        # 将光标移动到文件末尾
+        # Move read cursor to the start of file.
         file.seek(0, 2)
-        # 如果文件不为空，则在行末添加换行符
+        # If file is not empty
         if file.tell() > 0:
             file.write('\n')
-        # 添加新行
         file.write(line)
 
 class AppState:
@@ -159,7 +158,7 @@ class AppLoop:
         mode = self.mode
 
         # Load the camera configuration from the JSON file      
-        with open('./realsense/med_acc.json', 'r') as file:
+        with open('./3dr/realsense/med_acc.json', 'r') as file:
             json_text = file.read().strip()
             config_dict = json.loads(json_text)
 
@@ -340,9 +339,7 @@ class AppLoop:
             """draw point cloud with optional painter's algorithm"""
             if painter:
                 # Painter's algo, sort points from back to front
-
                 # get reverse sorted indices by z (in view-space)
-                # https://gist.github.com/stevenvo/e3dad127598842459b68
                 v = view(verts)
                 s = v[:, 2].argsort()[::-1]
                 proj = project(v[s])
@@ -483,16 +480,16 @@ class AppLoop:
                 state.scale ^= True
 
             if key == ord("g"):
-                AppLoop.log.info("Closing gripper")
-                AppLoop.gripper.move(0.11, 0.8, 60) # Gipper parameters: position, force, speed
-                # log.info("Closing gripper")
-                # gripper.move(0.11, 0.8, 60) # Gipper parameters: position, force, speed
+                # AppLoop.log.info("Closing gripper")
+                # AppLoop.gripper.move(0.11, 0.8, 60) # Gipper parameters: position, force, speed
+                log.info("Closing gripper")
+                gripper.move(0.11, 0.8, 60) # Gipper parameters: position, force, speed
                 time.sleep(3)
 
 
-            if key == ord("d"):
-                AppLoop.log.info("Opening gripper")
-                AppLoop.gripper.move(0.14, 0.1, 20) # Gipper parameters: position, force, speed
+            if key == ord("o"):
+                # AppLoop.log.info("Opening gripper")
+                # AppLoop.gripper.move(0.14, 0.1, 20) # Gipper parameters: position, force, speed
                 log.info("Opening gripper")
                 gripper.move(0.14, 0.1, 20) # Gipper parameters: position, force, speed
                 time.sleep(3)
@@ -505,22 +502,22 @@ class AppLoop:
 
             if key == ord("s"):
                 # cv2.imwrite('./out.png', out)
-                AppLoop.robot.setMode(mode.NRT_PRIMITIVE_EXECUTION)
-                AppLoop.robot.executePrimitive("ZeroFTSensor()")
-                AppLoop.log.info("ZeroFTSensor")
-                time.sleep(3)
-
-                AppLoop.robot.setMode(mode.NRT_PLAN_EXECUTION)
-                AppLoop.log.info("Executing plan")
-                AppLoop.robot.executePlan(22, True)
-                # robot.setMode(mode.NRT_PRIMITIVE_EXECUTION)
-                # robot.executePrimitive("ZeroFTSensor()")
-                # log.info("ZeroFTSensor")
+                # AppLoop.robot.setMode(mode.NRT_PRIMITIVE_EXECUTION)
+                # AppLoop.robot.executePrimitive("ZeroFTSensor()")
+                # AppLoop.log.info("ZeroFTSensor")
                 # time.sleep(3)
 
-                # robot.setMode(mode.NRT_PLAN_EXECUTION)
-                # log.info("Executing plan")
-                # robot.executePlan(22, True)
+                # AppLoop.robot.setMode(mode.NRT_PLAN_EXECUTION)
+                # AppLoop.log.info("Executing plan")
+                # AppLoop.robot.executePlan(22, True)
+                robot.setMode(mode.NRT_PRIMITIVE_EXECUTION)
+                robot.executePrimitive("ZeroFTSensor()")
+                log.info("ZeroFTSensor")
+                time.sleep(3)
+
+                robot.setMode(mode.NRT_PLAN_EXECUTION)
+                log.info("Executing plan")
+                robot.executePlan(22, True)
                 time.sleep(3)      
 
             if key in (27, ord("q")) or cv2.getWindowProperty(state.WIN_NAME, cv2.WND_PROP_AUTOSIZE) < 0:

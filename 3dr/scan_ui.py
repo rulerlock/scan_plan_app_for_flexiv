@@ -36,6 +36,7 @@ import open3d as o3d
 import numpy as np
 from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QFileDialog, QLabel, QVBoxLayout, QWidget, QLineEdit
 import gripper_init as gripinit
+import pc_scan as scan
 import datareader
 
 class ScanApp(QMainWindow):
@@ -136,7 +137,7 @@ class ScanApp(QMainWindow):
             return
         
         # 启动封装的循环类
-        app_loop = gripinit.AppLoop(robot_ip, local_ip)
+        app_loop = scan.AppLoop(robot_ip, local_ip)
         app_loop.run()
 
     def view_scan(self):
