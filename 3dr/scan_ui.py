@@ -38,6 +38,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QFileDialog,
 import gripper_init as gripinit
 import pc_scan as scan
 import datareader
+from sklearn.svm import SVC
 
 class ScanApp(QMainWindow):
     def __init__(self):
@@ -239,33 +240,36 @@ class ScanApp(QMainWindow):
     #             # o3d.visualization.draw_geometries([self.source, self.target, diff_cloud])
     #             self.label.setText("Difference calculation completed")
     #             # print()/
-    def calculate_difference(self, target, source, threshold=0.1, minpoints=10):
+
+    def rotate_vector(self, v, axis, theta):
+
+        axis = axis / np.linalg.norm(axis)
+        
+        cos_theta = np.cos(theta)
+        sin_theta = np.sin(theta)
+        
+        term1 = v * cos_theta
+        term2 = np.cross(axis, v) * sin_theta
+        term3 = axis * np.dot(axis, v) * (1 - cos_theta)
+
+        return term1 + term2 + term3
+
+    def points_in_cylinder(self, points, translation, rotation, radius, height):
+        transformed_points = copy.deepcopy(points)
+        transformed_points = (transformed_points - translation) @ rotation.T
+
+        distance_to_axis = np.sqrt(transformed_points[:, 0] ** 2 + transformed_points[:, 1] ** 2)
+        within_radius = distance_to_axis < radius
+        within_height = np.logical_and(transformed_points[:, 2] > - height / 2, transformed_points[:, 2] < height / 2)
+
+        return np.logical_and(within_radius, within_height)
+
+
+    def calculate_difference(self, target, source, threshold=0.1, minpoints=10, radius=0.05):
         if self.source is not None and self.target is not None:
             if self.transformation is not None:
         # closest_mask = find_closest_points(points1, points2, threshold)
-                tree = cKDTree(source)
-                distances, indices = tree.query(target)
-                closest_mask = distances < threshold
-                remaining_points = target[~closest_mask]
-                pcd = o3d.geometry.PointCloud()
-                pcd.points = o3d.utility.Vector3dVector(remaining_points)
-                labels = pcd.cluster_dbscan(eps=threshold, min_points=minpoints, print_progress=True)
-                centroids = []
-                for label in np.unique(labels):
-                    if label == -1:  # 跳过噪点
-                        continue
-                    indices = np.where(labels == label)[0]
-                    centroid = np.mean(np.asarray(pcd.points)[indices], axis=0)
-                    centroids.append((label, centroid))
-                min_distance_idx = centroids.index(min(centroids, key=lambda x: np.linalg.norm(x[1])))
-                target_pc = target[closest_mask]
-                gripper_pc = np.asarray(pcd.points)[np.where(labels == np.int32(min_distance_idx))[0]]
-                defec_pc = []
-                for lable in np.unique(labels):
-                    if lable == -1 or lable == min_distance_idx:
-                        continue
-                    defec_pc.append(np.asarray(pcd.points)[np.where(labels == lable)[0]])
-
+                target_pc, gripper_pc, defec_pc = self.clustering(np.asarray(self.target.points), np.asarray(self.source.points), threshold, minpoints)
                 pcds = []
                 pcd_target = o3d.geometry.PointCloud()
                 pcd_target.points = o3d.utility.Vector3dVector(target_pc)
@@ -283,8 +287,69 @@ class ScanApp(QMainWindow):
                     pcd.paint_uniform_color([1, 0, 0])
                     pcds.append(pcd)
                 o3d.visualization.draw_geometries(pcds, window_name="3D Point Cloud")
-                self.label.setText("Difference calculation completed")
-                # return target_pc, gripper_pc, defec_pc
+                S1 = np.vstack([target_pc, gripper_pc])
+                for points in defec_pc:
+                    S2 = points
+                    y = np.array([1] * len(S1) + [-1] * len(S2))
+                    X = np.vstack([S1, S2])
+                    sample_weight = [1] * len(S1) + [10] * len(S2)
+                    svm = SVC(kernel='linear', C=1.)
+                    svm.fit(X, y, sample_weight=sample_weight)
+                    w = svm.coef_[0]
+                    b = svm.intercept_[0]
+                    cylinder_mesh = o3d.geometry.TriangleMesh.create_cylinder(radius=0.05, height=0.001)
+                    normal_default = np.array([0, 0, 1])
+                    rotation_axis = np.cross(normal_default, w)
+                    rotation_angle = np.arccos(np.dot(normal_default, w) / (np.linalg.norm(w)))
+                    rotation_matrix = o3d.geometry.get_rotation_matrix_from_axis_angle(rotation_axis * rotation_angle)
+                    cylinder_mesh.rotate(rotation_matrix, center=[0, 0, 0])
+                    center_s2 = np.mean(S2, axis=0)
+                    d = (np.dot(w, center_s2) + b) / np.linalg.norm(w)
+                    projection = center_s2 - d * w / np.linalg.norm(w)
+                    for i in np.arange(0.0, radius - 0.03, 0.01):
+                        for j in np.arange(0, np.pi * 2, np.pi/6):
+                            cylinder_mesh.translate(-cylinder_mesh.get_center())
+                            # cylinder 沿着projection点在平面上圆周运动，需要求取平面内任意单位向量，将其长度置为i，在平面内旋转角为j
+                            dir = self.rotate_vector(rotation_axis, w, j)
+                            dir = dir / np.linalg.norm(dir) * i
+                            points_inside = self.points_in_cylinder(S1, projection, rotation_matrix, 0.05, 0.001)
+                            if np.sum(points_inside) == 0:
+                                cylinder_mesh.translate(projection + dir)
+                                #vis
+                                o3d.visualization.draw_geometries([cylinder_mesh] + pcds, window_name="3D Point Cloud")
+                                flag = 1
+                                break
+                        if flag == 1:
+                            break
+    
+    def find_closest_points(self, pcd1_points, pcd2_points, threshold=0.1):
+        tree = cKDTree(pcd2_points)
+        distances, indices = tree.query(pcd1_points)
+        closest_mask = distances < threshold
+        return closest_mask
+
+    def clustering(self, points1, points2, threshold=0.1, minpoints=10):
+        closest_mask = self.find_closest_points(points1, points2, threshold)
+        remaining_points = points1[~closest_mask]
+        pcd = o3d.geometry.PointCloud()
+        pcd.points = o3d.utility.Vector3dVector(remaining_points)
+        labels = pcd.cluster_dbscan(eps=threshold, min_points=minpoints, print_progress=True)
+        centroids = []
+        for label in np.unique(labels):
+            if label == -1:  # 跳过噪点
+                continue
+            indices = np.where(labels == label)[0]
+            centroid = np.mean(np.asarray(pcd.points)[indices], axis=0)
+            centroids.append((label, centroid))
+        min_distance_idx = centroids.index(min(centroids, key=lambda x: np.linalg.norm(x[1])))
+        target_pc = points1[closest_mask]
+        gripper_pc = np.asarray(pcd.points)[np.where(labels == np.int32(min_distance_idx))[0]]
+        defec_pc = []
+        for lable in np.unique(labels):
+            if lable == -1 or lable == min_distance_idx:
+                continue
+            defec_pc.append(np.asarray(pcd.points)[np.where(labels == lable)[0]])
+        return target_pc, gripper_pc, defec_pc
 
 if __name__ == "__main__":
     scan_app = QApplication(sys.argv)
