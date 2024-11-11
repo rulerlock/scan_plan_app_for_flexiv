@@ -133,7 +133,7 @@ class Dataset:
                 clustered_points.append(clustered_cur_points)
                 self.clustered_points = clustered_points
 
-        self.store_clustered(clustered_points)
+            self.store_clustered(clustered_points)
 
     def visualize_all(self):
         all_points = np.vstack(self.scans)

@@ -318,8 +318,15 @@ class ScanApp(QMainWindow):
                             points_inside = self.points_in_cylinder(S1, projection, rotation_matrix, 0.05, 0.001)
                             if np.sum(points_inside) == 0:
                                 cylinder_mesh.translate(projection + dir)
+                                # get the transformation from rotation and translation
+                                transformation = np.eye(4)
+                                transformation[:3, :3] = rotation_matrix
+                                transformation[:3, 3] = projection + dir
+                                cylinder_mesh2 = o3d.geometry.TriangleMesh.create_cylinder(radius=0.05, height=0.001)
+                                cylinder_mesh2.transform(transformation)
+                                print(transformation)
                                 #vis
-                                o3d.visualization.draw_geometries([cylinder_mesh] + pcds, window_name="3D Point Cloud")
+                                o3d.visualization.draw_geometries([cylinder_mesh,cylinder_mesh2] + pcds, window_name="3D Point Cloud")
                                 flag = 1
                                 break
                         if flag == 1:
