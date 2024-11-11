@@ -66,6 +66,7 @@ class Dataset:
             pc = o3d.geometry.PointCloud()
             pc.points = o3d.utility.Vector3dVector(points)
             o3d.io.write_point_cloud(clustered_path + '/clustered_'+ str(i+1).zfill(3)+'.ply', pc)
+        self.scans = self.read_ply_file(self.data_path)
 
 
     def clustering_process(self, point_cloud, threshold=0.04, minpoints=20):
@@ -101,40 +102,41 @@ class Dataset:
         return clustered_points
     
     def preprocess(self, threshold=0.1, minpoints=10):
-        real_T_fake = np.array([[1, 0, 0, 0],
-                        [0, -1, 0, 0],
-                        [0, 0, -1, 0],
-                        [0, 0, 0, 1]])
-        points = []
-        clustered_points = []
-        filtered_points = []
-        clustered_points = []
-        for i in range(len(self.scans)):
-            pc = o3d.geometry.PointCloud()
-            cur_points = np.asarray(self.scans[i])
-            # pc.points = o3d.utility.Vector3dVector(cur_points)
-            # o3d.visualization.draw_geometries([pc], window_name=f"3D Point Cloud {i}")
-            ones_column = np.ones((cur_points.shape[0], 1))
-            
-            cur_points = np.hstack((cur_points, ones_column))
-            cur_points = cur_points.T
-            cur_points = self.poses[i] @ real_T_fake @ cur_points
-            # cur_points = np.linalg.inv(dataset.poses[i]) @ real_T_fake @ cur_points
-            cur_points = cur_points.T
-            cur_points = cur_points[:, :3]
-            points.append(cur_points)
-            filtered_cur_points = cur_points[(cur_points[:, 0] >= -0.3) & (cur_points[:, 0] <= 0.3) &
-                                                (cur_points[:, 1] >= -0.3) & (cur_points[:, 1] <= 0.3) &
-                                                (cur_points[:, 2] >= -0.16) & (cur_points[:, 2] <= 0.3)]
-            filtered_points.append(filtered_cur_points)
-            clustered_cur_points = np.array(self.clustering_process(filtered_cur_points, threshold=threshold))
-            clustered_points.append(clustered_cur_points)
-            self.clustered_points = clustered_points
+        if not self.use_clustered:
+            real_T_fake = np.array([[1, 0, 0, 0],
+                            [0, -1, 0, 0],
+                            [0, 0, -1, 0],
+                            [0, 0, 0, 1]])
+            points = []
+            clustered_points = []
+            filtered_points = []
+            clustered_points = []
+            for i in range(len(self.scans)):
+                pc = o3d.geometry.PointCloud()
+                cur_points = np.asarray(self.scans[i])
+                # pc.points = o3d.utility.Vector3dVector(cur_points)
+                # o3d.visualization.draw_geometries([pc], window_name=f"3D Point Cloud {i}")
+                ones_column = np.ones((cur_points.shape[0], 1))
+                
+                cur_points = np.hstack((cur_points, ones_column))
+                cur_points = cur_points.T
+                cur_points = self.poses[i] @ real_T_fake @ cur_points
+                # cur_points = np.linalg.inv(dataset.poses[i]) @ real_T_fake @ cur_points
+                cur_points = cur_points.T
+                cur_points = cur_points[:, :3]
+                points.append(cur_points)
+                filtered_cur_points = cur_points[(cur_points[:, 0] >= -0.3) & (cur_points[:, 0] <= 0.3) &
+                                                    (cur_points[:, 1] >= -0.3) & (cur_points[:, 1] <= 0.3) &
+                                                    (cur_points[:, 2] >= -0.16) & (cur_points[:, 2] <= 0.3)]
+                filtered_points.append(filtered_cur_points)
+                clustered_cur_points = np.array(self.clustering_process(filtered_cur_points, threshold=threshold))
+                clustered_points.append(clustered_cur_points)
+                self.clustered_points = clustered_points
 
         self.store_clustered(clustered_points)
 
     def visualize_all(self):
-        all_points = np.vstack(self.clustered_points)
+        all_points = np.vstack(self.scans)
         pc = o3d.geometry.PointCloud()
         pc.points = o3d.utility.Vector3dVector(all_points)
         o3d.visualization.draw_geometries([pc], window_name='All Clustered Points')

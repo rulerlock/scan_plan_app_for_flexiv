@@ -161,10 +161,10 @@ class ScanApp(QMainWindow):
         if file_name1 and file_name2:
             # Read the point clouds
             # self.source = o3d.io.read_point_cloud(file_name1)
-            all_points = np.vstack(self.dataset.clustered_points)
-            self.source = o3d.geometry.PointCloud()
-            self.source.points = o3d.utility.Vector3dVector(all_points)
-            self.target = o3d.io.read_point_cloud(file_name2)
+            all_points = np.vstack(self.dataset.scans)
+            self.target = o3d.geometry.PointCloud()
+            self.target.points = o3d.utility.Vector3dVector(all_points)
+            self.source = o3d.io.read_point_cloud(file_name2)
             self.label.setText("Point cloud files loaded, please conduct alignment")
             o3d.visualization.draw_geometries([self.source, self.target], window_name="Please check point clouds size")
             
@@ -265,7 +265,10 @@ class ScanApp(QMainWindow):
         return np.logical_and(within_radius, within_height)
 
 
-    def calculate_difference(self, target, source, threshold=0.1, minpoints=10, radius=0.05):
+    def calculate_difference(self):
+        threshold=0.002
+        minpoints=10
+        radius=0.05
         if self.source is not None and self.target is not None:
             if self.transformation is not None:
         # closest_mask = find_closest_points(points1, points2, threshold)
@@ -328,7 +331,7 @@ class ScanApp(QMainWindow):
         closest_mask = distances < threshold
         return closest_mask
 
-    def clustering(self, points1, points2, threshold=0.1, minpoints=10):
+    def clustering(self, points1, points2, threshold=0.002, minpoints=10):
         closest_mask = self.find_closest_points(points1, points2, threshold)
         remaining_points = points1[~closest_mask]
         pcd = o3d.geometry.PointCloud()
