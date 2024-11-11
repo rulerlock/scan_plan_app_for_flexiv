@@ -483,7 +483,7 @@ class AppLoop:
                 # AppLoop.log.info("Closing gripper")
                 # AppLoop.gripper.move(0.11, 0.8, 60) # Gipper parameters: position, force, speed
                 log.info("Closing gripper")
-                gripper.move(0.11, 0.8, 60) # Gipper parameters: position, force, speed
+                gripper.move(0.03, 0.8, 80) # Gipper parameters: position, speed, force
                 time.sleep(3)
 
 

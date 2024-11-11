@@ -554,8 +554,12 @@ class AppLoop:
                 # AppLoop.robot.executePlan(22, True)
                 robot.setMode(mode.NRT_PRIMITIVE_EXECUTION)
                 robot.executePrimitive("ZeroFTSensor()")
-                log.info("ZeroFTSensor")
+                log.info("Zeroing FTSensor")
                 time.sleep(3)
+                robot.setMode(mode.NRT_PLAN_EXECUTION)
+                log.info("Robot is now operational")
+                robot.executePlan(22, True)
+                time.sleep(1)  
 
             if key == ord("e"):
                 points.export_to_ply('./scan_output/scans/out_'+str(count).zfill(3)+'.ply', mapped_frame)
