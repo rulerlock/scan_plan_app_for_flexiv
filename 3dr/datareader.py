@@ -68,7 +68,7 @@ class Dataset:
             o3d.io.write_point_cloud(clustered_path + '/clustered_'+ str(i+1).zfill(3)+'.ply', pc)
 
 
-    def clustering_process(point_cloud, threshold=0.04, minpoints=20):
+    def clustering_process(self, point_cloud, threshold=0.04, minpoints=20):
 
         pc = copy.deepcopy(point_cloud)
         pcd = o3d.geometry.PointCloud()
