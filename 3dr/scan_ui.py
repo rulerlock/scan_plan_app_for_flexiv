@@ -146,6 +146,8 @@ class ScanApp(QMainWindow):
             self.data_path = folder_path
             self.folder_path_label.setText(f"Selected Folder: {folder_path}")
             self.dataset = datareader.Dataset(self.data_path)
+            self.dataset.preprocess()
+            self.dataset.visualize_all()
 
 
 
@@ -157,7 +159,10 @@ class ScanApp(QMainWindow):
         
         if file_name1 and file_name2:
             # Read the point clouds
-            self.source = o3d.io.read_point_cloud(file_name1)
+            # self.source = o3d.io.read_point_cloud(file_name1)
+            all_points = np.vstack(self.dataset.clustered_points)
+            self.source = o3d.geometry.PointCloud()
+            self.source.points = o3d.utility.Vector3dVector(all_points)
             self.target = o3d.io.read_point_cloud(file_name2)
             self.label.setText("Point cloud files loaded, please conduct alignment")
             o3d.visualization.draw_geometries([self.source, self.target], window_name="Please check point clouds size")
