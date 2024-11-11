@@ -34,8 +34,10 @@ import json
 # Import Flexiv RDK Python library
 # fmt: off
 import sys
-sys.path.insert(0, "../lib_py")
+sys.path.insert(0, "lib_py")
 import flexivrdk
+
+
 # fmt: on
 
 def append_line_to_txt(filename, line):
@@ -503,7 +505,7 @@ class AppLoop:
 
             if key == ord("s"):
                 # cv2.imwrite('./out.png', out)
-               AppLoop.robot.setMode(mode.NRT_PRIMITIVE_EXECUTION)
+                AppLoop.robot.setMode(mode.NRT_PRIMITIVE_EXECUTION)
                 AppLoop.robot.executePrimitive("ZeroFTSensor()")
                 AppLoop.log.info("ZeroFTSensor")
                 time.sleep(3)

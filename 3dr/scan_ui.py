@@ -43,41 +43,45 @@ class ScanApp(QMainWindow):
         super().__init__()
 
         # Initialize the UI
-        self.setWindowTitle("Scan with Gripper")
+        self.setWindowTitle("Grip and Scan with Flexiv RDK") 
         self.setGeometry(100, 100, 600, 400)
 
         # Setup the layout
         self.layout = QVBoxLayout()
-        self.label = QLabel("Select two point cloud files and match key points", self)
+        self.label = QLabel("Welcome! Please fill in the robot and local IP", self)
         self.layout.addWidget(self.label)
 
 
-        # 添加robot_ip输入框
+        # Robot_ip input
         self.robot_ip_label = QLabel("Robot IP:")
         self.robot_ip_input = QLineEdit()
         self.layout.addWidget(self.robot_ip_label)
         self.layout.addWidget(self.robot_ip_input)
 
-        # 添加local_ip输入框
+        # Local_ip input
         self.local_ip_label = QLabel("Local IP:")
         self.local_ip_input = QLineEdit()
         self.layout.addWidget(self.local_ip_label)
         self.layout.addWidget(self.local_ip_input)
 
+        # Show point cloud file loading status
+        self.folder_path_label = QLabel("No folder selected")
+        self.layout.addWidget(self.folder_path_label)
+
         # Init robot
         self.grip_object_button = QPushButton("Grip Object", self)
         self.grip_object_button.clicked.connect(self.grip_object)
-        self.layout.addWidget(self.grip_object)
+        self.layout.addWidget(self.grip_object_button)
 
         # Capture point cloud
-        # self.auto_align_button = QPushButton("Capture Point Cloud", self)
-        # self.auto_align_button.clicked.connect(self.grip_object)
-        # self.layout.addWidget(self.grip_object)        
+        self.start_scan_button = QPushButton("Start Scanning", self)
+        self.start_scan_button.clicked.connect(self.start_scan)
+        self.layout.addWidget(self.start_scan_button)        
         
         # Point cloud alignment
-        self.read_point_cloud_button = QPushButton("View Capture Result", self)
-        self.read_point_cloud_button.clicked.connect(self.read_point_cloud)
-        self.layout.addWidget(self.read_point_cloud)
+        self.view_scan_button = QPushButton("View Capture Result", self)
+        self.view_scan_button.clicked.connect(self.view_scan)
+        self.layout.addWidget(self.view_scan_button)
 
         # Load CAD model
         self.load_button = QPushButton("Load Point Cloud Files", self)
@@ -121,7 +125,7 @@ class ScanApp(QMainWindow):
 
 
 
-    def read_point_cloud(self):
+    def start_scan(self):
         # 获取用户输入的IP地址
         robot_ip = self.robot_ip_input.text()
         local_ip = self.local_ip_input.text()
@@ -134,6 +138,13 @@ class ScanApp(QMainWindow):
         # 启动封装的循环类
         app_loop = gripinit.AppLoop(robot_ip, local_ip)
         app_loop.run()
+
+    def view_scan(self):
+        folder_path = QFileDialog.getExistingDirectory(self, "Select Dataset Folder")
+        if folder_path:
+            self.data_path = folder_path
+            self.folder_path_label.setText(f"Selected Folder: {folder_path}")
+            self.dataset = datareader.Dataset(self.data_path)
 
 
 
@@ -148,7 +159,7 @@ class ScanApp(QMainWindow):
             self.source = o3d.io.read_point_cloud(file_name1)
             self.target = o3d.io.read_point_cloud(file_name2)
             self.label.setText("Point cloud files loaded, please conduct alignment")
-            o3d.visualization.draw_geometries([self.source, self.target])
+            o3d.visualization.draw_geometries([self.source, self.target], window_name="Please check point clouds size")
             
 
     def pick_points(self, point_cloud):
@@ -191,7 +202,7 @@ class ScanApp(QMainWindow):
             self.source.transform(trans_init)
             self.label.setText("Alignment completed")
             self.diff_button.setEnabled(True)  # Enable difference calculation
-            o3d.visualization.draw_geometries([self.source, self.target])
+            o3d.visualization.draw_geometries([self.source, self.target], window_name="Aligned Point Clouds")
             self.transformation = trans_init
 
         else:
