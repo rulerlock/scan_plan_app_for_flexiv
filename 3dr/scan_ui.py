@@ -312,7 +312,6 @@ class ScanApp(QMainWindow):
                     for i in np.arange(0.0, radius - 0.03, 0.01):
                         for j in np.arange(0, np.pi * 2, np.pi/6):
                             cylinder_mesh.translate(-cylinder_mesh.get_center())
-                            # cylinder 沿着projection点在平面上圆周运动，需要求取平面内任意单位向量，将其长度置为i，在平面内旋转角为j
                             dir = self.rotate_vector(rotation_axis, w, j)
                             dir = dir / np.linalg.norm(dir) * i
                             points_inside = self.points_in_cylinder(S1, projection, rotation_matrix, 0.05, 0.001)
