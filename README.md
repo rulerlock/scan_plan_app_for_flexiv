@@ -7,6 +7,8 @@ This project mainly includes two components:
 1. [Python RDK Based] Grip object, scanning, point cloud processing and trimming pose generation
 2. [ROS 2 Based] Trajectory planning and execution
 
+![Project Workflow]('flexiv_rdk/doc/Project_workflow.png')
+
 
 
 ## References
@@ -43,8 +45,6 @@ Uppon successful calibration, the trasformation matrix will be saved to /3dr/bas
 
 ### Scan, match CAD and calculate trimming pose
 
-![Project Workflow]('/flexiv_rdk/doc/Project_workflow.png')
-
 The work flow is packed into a main panel. To start, run:
 
         python3 scan_ui.py
@@ -58,15 +58,11 @@ Key in robot arm IP and local IP. Follow the sequece of buttons to:
 
 #### ROS 2 Trimming Execution
 
-1. Install Microsoft Visual Studio with version 2015 or above (MSVC 14.0+). Choose the "Desktop development with C++" package during installation.
-2. Download ``cmake-3.x.x-windows-x86_64.msi`` from [CMake download page](https://cmake.org/download/) and install the msi file. The minimum required version is 3.16.3. **Add CMake to system PATH** when prompted, so that ``cmake`` and ``cmake-gui`` command can be used from Command Prompt or a bash emulator.
-3. Install a bash emulator. Git Bash that comes with Git (for Windows) installation is recommended.
-4. Within the bash emulator, the rest steps are the same as [Compile and install for Linux](#compile-and-install-for-linux), beginning from step 2.
-
-
-
+Use the calculating result of trimming parts' poses as the input of OMPL planning of Rizon 4 robot arm in ROS 2 MoveIt environment.
 
 #### Compile and install for Linux
+
+To begin, the environment setup of Flexiv ROS 2 bridge should be done. See [Flexiv ROS 2 Package](https://rdk.flexiv.com/manual/ros2_packages.html)
 
 1. Modify the trimming poses in script main1.cpp:
 
