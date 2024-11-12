@@ -43,7 +43,7 @@ Uppon successful calibration, the trasformation matrix will be saved to /3dr/bas
 
 ### Scan, match CAD and calculate trimming pose
 
-![Project Workflow]('/flexiv_rdk/doc')
+![Project Workflow]('/flexiv_rdk/doc/Project_workflow.png')
 
 The work flow is packed into a main panel. To start, run:
 
@@ -68,9 +68,9 @@ Key in robot arm IP and local IP. Follow the sequece of buttons to:
 
 #### Compile and install for Linux
 
-1. Modify the trimming pose at:
+1. Modify the trimming poses in script main1.cpp:
 
-        cd /flexiv_ros2_ws/src/flexiv_ros2/flexiv_bringup2/src/main1.cpp
+        /flexiv_ros2_ws/src/flexiv_ros2/flexiv_bringup2/src/main1.cpp
 
 2. Assuming the setup detailed in the Flexiv ROS 2 bridge is done, compile the program: 
 
@@ -80,7 +80,7 @@ Key in robot arm IP and local IP. Follow the sequece of buttons to:
 
    Note: ``sudo`` is not required unless prompted by the program saying "root privilege is required".
 
-2. Initialise the MoveIt 2 enviornment:
+3. Initialise the MoveIt 2 enviornment:
 
         ros2 launch flexiv_bringup rizon_moveit.launch.py robot_ip:=192.168.3.100 local_ip:=192.168.3.163
         colcon build --packages-select flexiv_bringup2
@@ -89,17 +89,108 @@ Key in robot arm IP and local IP. Follow the sequece of buttons to:
 
         ros2 launch flexiv_bringup2 rizon_moveit.launch.py robot_ip:=dont-care local_ip:=dont-care use_fake_hardware:=true
 
-3. Run the planning script:
+4. Run the planning script:
 
         ros2 launch flexiv_bringup2 rizon_main.launch.py robot_ip:=dont-care local_ip:=dont-care use_fake_hardware:=true
 
+   If you don't run on a real robot, run simulation instead:
+   
+        ros2 launch flexiv_bringup2 rizon_main.launch.py robot_ip:=192.168.3.100 local_ip:=192.168.3.163 use_fake_hardware:=false
 
+5. If the path is sovled, there will be log "Path computed successfully. Waiting for confirming". Check the path on RViZ. Change the parameter to execute on robot:
 
-ros2 launch flexiv_bringup2 rizon_main.launch.py robot_ip:=192.168.3.100 local_ip:=192.168.3.163 use_fake_hardware:=false
+        ros2 param set main1 continue_execution true    
 
-#### Compile and install for macOS
+#### File Tree
 
-1. In a Terminal, use ``xcode-select`` command to invoke the installation of Xcode Command Line Tools, then follow the prompted window to finish the installation.
-2. Download ``cmake-3.x.x-macos-universal.dmg`` from [CMake download page](https://cmake.org/download/) and install the dmg file. The minimum required version is 3.16.3.
-3. When done, start CMake from Launchpad and navigate to Tools -> How to Install For Command Line Use. Then follow the instruction "Or, to install symlinks to '/usr/local/bin', run:" to install ``cmake`` and ``cmake-gui`` command for use in Terminal.
-4. The rest steps are the same as [Compile and install for Linux](#compile-and-install-for-linux), beginning from step 2.
+flexiv_rdk
+├── 3dr
+│   ├── base_T_camera.txt
+│   ├── datareader.py
+│   ├── gripper_init.py
+│   ├── hand_eye_calibration.py
+│   ├── hgtm.py
+│   ├── lib_py
+│   ├── pc_process_1.py
+│   ├── pc_scan.py
+│   ├── pointcloud_scan.py
+│   ├── realsense
+│   ├── save_txt.py
+│   └── scan_ui.py
+├── cmake
+├── CMakeLists.txt
+├── doc
+├── example
+├── example_py
+│   ├── basics1_display_robot_states.py
+│   ├── basics2_clear_fault.py
+│   ├── basics3_primitive_execution.py
+│   ├── basics4_plan_execution.py
+│   ├── basics5_zero_force_torque_sensors.py
+│   ├── basics6_gripper_control.py
+│   ├── basics7_auto_recovery.py
+│   ├── intermediate1_non_realtime_joint_position_control.py
+│   ├── intermediate2_non_realtime_cartesian_pure_motion_control.py
+│   ├── intermediate3_non_realtime_cartesian_motion_force_control.py
+│   ├── intermediate4_teach_by_demonstration.py
+│   └── utility.py
+├── file_rdk.txt
+├── include
+├── lib
+├── lib_py
+├── librealsense-2.55.1
+├── LICENSE
+├── README.md
+├── requirements.txt
+├── resources
+├── scan_output
+│   ├── poses.txt
+│   ├── scans
+│   └── tcp.txt
+├── test
+└── thirdparty
+
+flexiv_ros2_ws
+├── build
+├── file_tree.txt
+├── install
+├── log
+└── src
+    └── flexiv_ros2
+        ├── build
+        ├── flexiv_bringup
+        ├── flexiv_bringup2	# Package written for this project
+        │   ├── CMakeLists.txt
+        │   ├── config
+        │   ├── launch
+        │   │   ├── rizon.launch.py
+        │   │   ├── rizon_main.launch.py	# Launch file for trimming trajectory planning
+        │   │   ├── rizon_moveit_constrain.launch.py
+        │   │   ├── rizon_moveit.launch.py	# Main launch file for RViZ env
+        │   │   ├── sine_sweep_impedance.launch.py
+        │   │   ├── sine_sweep_position.launch.py
+        │   │   └── test_joint_trajectory_controller.launch.py
+        │   ├── package.xml
+        │   ├── README.md
+        │   └── src
+        │       └── main1.cpp
+        ├── flexiv_controllers
+        ├── flexiv_description
+        ├── flexiv_hardware
+        ├── flexiv_moveit_config
+        │   ├── CMakeLists.txt
+        │   ├── config
+        │   │   ├── joint_limits.yaml
+        │   │   ├── kinematics.yaml
+        │   │   ├── moveit_controllers.yaml
+        │   │   ├── ompl_planning.yaml		# Edited OMPL planner configs
+        │   │   └── rizon_moveit_servo_config.yaml
+        │   ├── package.xml
+        │   ├── rviz
+        │   └── srdf
+        ├── flexiv_msgs
+        ├── flexiv_test_nodes
+        ├── install
+        ├── LICENSE
+        ├── log
+        └── README.md
