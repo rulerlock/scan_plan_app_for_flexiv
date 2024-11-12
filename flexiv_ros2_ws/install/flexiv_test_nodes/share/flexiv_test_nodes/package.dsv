@@ -1,0 +1,9 @@
+source;share/flexiv_test_nodes/hook/pythonpath.ps1
+source;share/flexiv_test_nodes/hook/pythonpath.dsv
+source;share/flexiv_test_nodes/hook/pythonpath.sh
+source;share/flexiv_test_nodes/hook/ament_prefix_path.ps1
+source;share/flexiv_test_nodes/hook/ament_prefix_path.dsv
+source;share/flexiv_test_nodes/hook/ament_prefix_path.sh
+source;../../build/flexiv_test_nodes/share/flexiv_test_nodes/hook/pythonpath_develop.ps1
+source;../../build/flexiv_test_nodes/share/flexiv_test_nodes/hook/pythonpath_develop.dsv
+source;../../build/flexiv_test_nodes/share/flexiv_test_nodes/hook/pythonpath_develop.sh
