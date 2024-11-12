@@ -82,7 +82,7 @@ To begin, the environment setup of Flexiv ROS 2 bridge should be done. See [Flex
 
 3. Initialise the MoveIt 2 enviornment:
 
-        ros2 launch flexiv_bringup rizon_moveit.launch.py robot_ip:=192.168.3.100 local_ip:=192.168.3.163
+        ros2 launch flexiv_bringup rizon_moveit.launch.py robot_ip:=[robot ip] local_ip:=[local ip]
         colcon build --packages-select flexiv_bringup2
 
    If you don't run on a real robot, run simulation instead:
@@ -91,11 +91,11 @@ To begin, the environment setup of Flexiv ROS 2 bridge should be done. See [Flex
 
 4. Run the planning script:
 
-        ros2 launch flexiv_bringup2 rizon_main.launch.py robot_ip:=dont-care local_ip:=dont-care use_fake_hardware:=true
+        ros2 launch flexiv_bringup2 rizon_main.launch.py robot_ip:=[robot ip] local_ip:=[local ip] use_fake_hardware:=false
 
    If you don't run on a real robot, run simulation instead:
    
-        ros2 launch flexiv_bringup2 rizon_main.launch.py robot_ip:=192.168.3.100 local_ip:=192.168.3.163 use_fake_hardware:=false
+        ros2 launch flexiv_bringup2 rizon_moveit.launch.py robot_ip:=dont-care local_ip:=dont-care  use_fake_hardware:=true
 
 5. If the path is sovled, there will be log "Path computed successfully. Waiting for confirming". Check the path on RViZ. Change the parameter to execute on robot:
 
