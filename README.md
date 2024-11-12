@@ -7,7 +7,7 @@ This project mainly includes two components:
 1. [Python RDK Based] Grip object, scanning, point cloud processing and trimming pose generation
 2. [ROS 2 Based] Trajectory planning and execution
 
-![Project Workflow]('/flexiv_rdk/doc/Project_workflow.png')
+![Project Workflow]('https://github.com/rulerlock/scan_plan_app_for_flexiv/blob/main/flexiv_rdk/doc/Project_workflow.png')
 
 ## References
 
