@@ -3,7 +3,7 @@ Read and visualise local point cloud
 
 Usage:
 ------
-Make sure point cloud files under "/scans" folder
+Make sure point cloud files under "/scans" or '/clustered' folder
 Save camera to hand poses in file "/poses.txt"
 
 """

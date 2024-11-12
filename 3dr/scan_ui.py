@@ -112,32 +112,32 @@ class ScanApp(QMainWindow):
 
 
     def grip_object(self):
-        # 获取用户输入的IP地址
+
         robot_ip = self.robot_ip_input.text()
         local_ip = self.local_ip_input.text()
 
-        # 检查是否填写了IP
+
         if not robot_ip or not local_ip:
             print("Please enter both robot IP and local IP")
             return
         
-        # 启动封装的循环类
+
         app_loop = gripinit.AppLoop(robot_ip, local_ip)
         app_loop.run()
 
 
 
     def start_scan(self):
-        # 获取用户输入的IP地址
+
         robot_ip = self.robot_ip_input.text()
         local_ip = self.local_ip_input.text()
 
-        # 检查是否填写了IP
+
         if not robot_ip or not local_ip:
             print("Please enter both robot IP and local IP")
             return
         
-        # 启动封装的循环类
+
         app_loop = scan.AppLoop(robot_ip, local_ip)
         app_loop.run()
 
