@@ -1,4 +1,4 @@
-# Flexiv RDK
+# Flexiv Scan Plan App
 
 ![CMake Badge](https://github.com/flexivrobotics/flexiv_rdk/actions/workflows/cmake.yml/badge.svg)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
@@ -20,6 +20,12 @@ Flexiv RDK (Robotic Development Kit), a key component of the Flexiv Robotic Soft
 | **Supported OS**           | **Supported processor** | **Supported language** | **Required compiler kit** |
 | -------------------------- | ----------------------- | ---------------------- | ------------------------- |
 | Linux (Ubuntu       22.04) | x86_64, arm64           | C++, Python            | build-essential           |
+
+**RDK Version** 
+v0.10.0
+
+**ROS Version** 
+ROS 2 Humble Hawksbill
 
 
 ## Quick Start
