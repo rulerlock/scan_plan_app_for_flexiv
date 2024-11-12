@@ -38,20 +38,9 @@ import sys
 sys.path.insert(0, "lib_py")
 import flexivrdk
 
-
 # fmt: on
 
-# def append_line_to_txt(filename, line):
-#     with open(filename, 'a+') as file:
-#         # Move read cursor to the start of file.
-#         file.seek(0, 2)
-#         # If file is not empty
-#         if file.tell() > 0:
-#             file.write('\n')
-#         file.write(line)
-
 class AppState:
-
     def __init__(self, *args, **kwargs):
         self.WIN_NAME = 'RealSense'
         #self.pitch, self.yaw = math.radians(-10), math.radians(-15)
@@ -78,16 +67,9 @@ class AppState:
     @property
     def pivot(self):
         return self.translation + np.array((0, 0, self.distance), dtype=np.float32)
-    
 
 class AppLoop:
     def __init__(self, robot_ip, local_ip):
-        # argparser = argparse.ArgumentParser()
-        # argparser.add_argument("robot_ip", help="IP address of the robot server")
-        # argparser.add_argument("local_ip", help="IP address of this PC")
-        # args = argparser.parse_args()
-        # robot = flexivrdk.Robot(args.robot_ip, args.local_ip)
-
         self.robot = flexivrdk.Robot(robot_ip, local_ip)
         self.gripper = flexivrdk.Gripper(self.robot)
         self.gripper_states = flexivrdk.GripperStates()
@@ -102,11 +84,7 @@ class AppLoop:
         log = self.log
         mode = self.mode
 
-        self.base_T_camera = np.loadtxt('./3dr/base_T_camera.txt').reshape(4, 4)
-        # self.base_T_camera = np.array([[ 0.99906299,  0.02242375,  0.03701784,  0.82142274],
-        # [-0.03600151, -0.04414769,  0.99837612, -0.33092116],
-        # [ 0.02402159, -0.99877333, -0.04329903,  0.26998527],
-        # [ 0.,          0.,          0.,          1.        ]])                         
+        self.base_T_camera = np.loadtxt('./3dr/base_T_camera.txt').reshape(4, 4)                      
 
         # Clear fault on robot server if any
         if robot.isFault():
@@ -141,28 +119,7 @@ class AppLoop:
         self.robot_states = flexivrdk.RobotStates()
         count = 1
         time.sleep(3)
-
-        # log.info("Opening gripper")
-        # gripper.move(0.14, 0.1, 20) # Gipper parameters: position, force, speed
-        # time.sleep(3)
-
         self.state = AppState()
-
-
-
-
-    # def get_newest_filenames(folder_path):
-    #     file_num = []
-    #     for filename in os.listdir(folder_path):
-    #         # exclude directories
-    #         if os.path.isfile(os.path.join(folder_path, filename)):
-    #             last_three_digits = filename[-3:].zfill(3)
-    #             file_num.append(int(last_three_digits))
-    #         if not file_num:
-    #             file_num = 1 
-    #     return file_num
-
-    
 
     def run(self):
         state = self.state
@@ -501,8 +458,8 @@ class AppLoop:
             dt = time.time() - now
 
             cv2.setWindowTitle(
-                state.WIN_NAME, "RealSense (%dx%d) %dFPS (%.2fms) %s" %
-                (w, h, 1.0/dt, dt*1000, "PAUSED" if state.paused else ""))
+                state.WIN_NAME, "RealSense %dFPS (%.2fms) %s" %
+                (1.0/dt, dt*1000, "PAUSED" if state.paused else ""))
 
             cv2.imshow(state.WIN_NAME, out)
             key = cv2.waitKey(1)
@@ -521,37 +478,15 @@ class AppLoop:
             if key == ord("z"):
                 state.scale ^= True
 
-            # if key == ord("g"):
-            #     # AppLoop.log.info("Closing gripper")
-            #     # AppLoop.gripper.move(0.11, 0.8, 60) # Gipper parameters: position, force, speed
-            #     log.info("Closing gripper")
-            #     gripper.move(0.11, 0.8, 60) # Gipper parameters: position, force, speed
-            #     time.sleep(3)
-
-
-            # if key == ord("o"):
-            #     # AppLoop.log.info("Opening gripper")
-            #     # AppLoop.gripper.move(0.14, 0.1, 20) # Gipper parameters: position, force, speed
-            #     log.info("Opening gripper")
-            #     gripper.move(0.14, 0.1, 20) # Gipper parameters: position, force, speed
-            #     time.sleep(3)
-
             if key == ord("n"):
                 use_gaussian_blur = not use_gaussian_blur
 
             if key == ord("c"):
                 state.color ^= True
 
+            # Stabilize robot arm due to the non-realtime torque info
             if key == ord("s"):
-                # cv2.imwrite('./out.png', out)
-                # AppLoop.robot.setMode(mode.NRT_PRIMITIVE_EXECUTION)
-                # AppLoop.robot.executePrimitive("ZeroFTSensor()")
-                # AppLoop.log.info("ZeroFTSensor")
-                # time.sleep(3)
-
-                # AppLoop.robot.setMode(mode.NRT_PLAN_EXECUTION)
-                # AppLoop.log.info("Executing plan")
-                # AppLoop.robot.executePlan(22, True)
+            
                 robot.setMode(mode.NRT_PRIMITIVE_EXECUTION)
                 robot.executePrimitive("ZeroFTSensor()")
                 log.info("Zeroing FTSensor")
@@ -561,6 +496,7 @@ class AppLoop:
                 robot.executePlan(22, True)
                 time.sleep(1)  
 
+            # Save point cloud and pose
             if key == ord("e"):
                 points.export_to_ply('./scan_output/scans/out_'+str(count).zfill(3)+'.ply', mapped_frame)
                 robot.getRobotStates(self.robot_states)
@@ -575,11 +511,8 @@ class AppLoop:
                 cv2.imwrite(depth_save_path, depth_image)
                 cv2.imwrite(color_save_path, color_image)
                 count += 1
-
-                # robot.setMode(mode.NRT_PLAN_EXECUTION)
                 log.info("Data saved, total number of scans: " + str(count))
-                # robot.executePlan(22, True)
-                # time.sleep(3)      
+   
 
             if key in (27, ord("q")) or cv2.getWindowProperty(state.WIN_NAME, cv2.WND_PROP_AUTOSIZE) < 0:
                 break

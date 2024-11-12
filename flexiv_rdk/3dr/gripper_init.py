@@ -82,12 +82,6 @@ class AppState:
 
 class AppLoop:
     def __init__(self, robot_ip, local_ip):
-        # argparser = argparse.ArgumentParser()
-        # argparser.add_argument("robot_ip", help="IP address of the robot server")
-        # argparser.add_argument("local_ip", help="IP address of this PC")
-        # args = argparser.parse_args()
-        # robot = flexivrdk.Robot(args.robot_ip, args.local_ip)
-
         self.robot = flexivrdk.Robot(robot_ip, local_ip)
         self.gripper = flexivrdk.Gripper(self.robot)
         self.gripper_states = flexivrdk.GripperStates()
@@ -100,12 +94,7 @@ class AppLoop:
         gripper = self.gripper
         gripper_states = self.gripper_states
         log = self.log
-        mode = self.mode
-
-        base_T_camera = np.array([[ 0.99906299,  0.02242375,  0.03701784,  0.82142274],
-        [-0.03600151, -0.04414769,  0.99837612, -0.33092116],
-        [ 0.02402159, -0.99877333, -0.04329903,  0.26998527],
-        [ 0.,          0.,          0.,          1.        ]])                         
+        mode = self.mode                      
 
         # Clear fault on robot server if any
         if robot.isFault():
@@ -385,7 +374,6 @@ class AppLoop:
             # Grab camera data
             if not state.paused:
                 # Wait for a coherent pair of frames: depth and color
-
                 framesets = []
 
                 for i in range(10):
@@ -459,8 +447,8 @@ class AppLoop:
             dt = time.time() - now
 
             cv2.setWindowTitle(
-                state.WIN_NAME, "RealSense (%dx%d) %dFPS (%.2fms) %s" %
-                (w, h, 1.0/dt, dt*1000, "PAUSED" if state.paused else ""))
+                state.WIN_NAME, "RealSense %dFPS (%.2fms) %s" %
+                (1.0/dt, dt*1000, "PAUSED" if state.paused else ""))
 
             cv2.imshow(state.WIN_NAME, out)
             key = cv2.waitKey(1)
@@ -474,22 +462,17 @@ class AppLoop:
             if key == ord("d"):
                 state.decimate = (state.decimate + 1) % 3
                 decimate.set_option(rs.option.filter_magnitude, 2 ** state.decimate)
-                #print(state.decimate)
 
             if key == ord("z"):
                 state.scale ^= True
 
             if key == ord("g"):
-                # AppLoop.log.info("Closing gripper")
-                # AppLoop.gripper.move(0.11, 0.8, 60) # Gipper parameters: position, force, speed
                 log.info("Closing gripper")
                 gripper.move(0.03, 0.8, 80) # Gipper parameters: position, speed, force
                 time.sleep(3)
 
 
             if key == ord("o"):
-                # AppLoop.log.info("Opening gripper")
-                # AppLoop.gripper.move(0.14, 0.1, 20) # Gipper parameters: position, force, speed
                 log.info("Opening gripper")
                 gripper.move(0.14, 0.1, 20) # Gipper parameters: position, force, speed
                 time.sleep(3)
@@ -500,16 +483,8 @@ class AppLoop:
             if key == ord("c"):
                 state.color ^= True
 
+            # Stabilize robot arm due to the non-realtime torque info
             if key == ord("s"):
-                # cv2.imwrite('./out.png', out)
-                # AppLoop.robot.setMode(mode.NRT_PRIMITIVE_EXECUTION)
-                # AppLoop.robot.executePrimitive("ZeroFTSensor()")
-                # AppLoop.log.info("ZeroFTSensor")
-                # time.sleep(3)
-
-                # AppLoop.robot.setMode(mode.NRT_PLAN_EXECUTION)
-                # AppLoop.log.info("Executing plan")
-                # AppLoop.robot.executePlan(22, True)
                 robot.setMode(mode.NRT_PRIMITIVE_EXECUTION)
                 robot.executePrimitive("ZeroFTSensor()")
                 log.info("ZeroFTSensor")
