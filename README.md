@@ -7,7 +7,7 @@ This project mainly includes two components:
 1. [Python RDK Based] Grip object, scanning, point cloud processing and trimming pose generation
 2. [ROS 2 Based] Trajectory planning and execution
 
-![Project Workflow]('https://github.com/rulerlock/scan_plan_app_for_flexiv/blob/main/flexiv_rdk/doc/Project_workflow.png')
+![Project Workflow](https://github.com/rulerlock/scan_plan_app_for_flexiv/blob/main/flexiv_rdk/doc/Project_workflow.png)
 
 ## References
 
@@ -97,43 +97,44 @@ To begin, the environment setup of Flexiv ROS 2 bridge should be done. See [Flex
    
         ros2 launch flexiv_bringup2 rizon_moveit.launch.py robot_ip:=dont-care local_ip:=dont-care  use_fake_hardware:=true
 
-5. If the path is sovled, there will be log "Path computed successfully. Waiting for confirming". Check the path on RViZ. Change the parameter to execute on robot:
+5. If the path is solved, there will be log "Path computed successfully. Waiting for confirming". Check the path on RViZ. Change the parameter to execute on robot:
 
         ros2 param set main1 continue_execution true    
 
 #### File Tree
 
+```
 flexiv_rdk
 ├── 3dr
-│   ├── base_T_camera.txt
-│   ├── datareader.py
-│   ├── gripper_init.py
-│   ├── hand_eye_calibration.py
-│   ├── hgtm.py
-│   ├── lib_py
-│   ├── pc_process_1.py
-│   ├── pc_scan.py
-│   ├── pointcloud_scan.py
-│   ├── realsense
-│   ├── save_txt.py
-│   └── scan_ui.py
+│   ├── base_T_camera.txt
+│   ├── datareader.py
+│   ├── gripper_init.py
+│   ├── hand_eye_calibration.py
+│   ├── hgtm.py
+│   ├── lib_py
+│   ├── pc_process_1.py
+│   ├── pc_scan.py
+│   ├── pointcloud_scan.py
+│   ├── realsense
+│   ├── save_txt.py
+│   └── scan_ui.py
 ├── cmake
 ├── CMakeLists.txt
 ├── doc
 ├── example
 ├── example_py
-│   ├── basics1_display_robot_states.py
-│   ├── basics2_clear_fault.py
-│   ├── basics3_primitive_execution.py
-│   ├── basics4_plan_execution.py
-│   ├── basics5_zero_force_torque_sensors.py
-│   ├── basics6_gripper_control.py
-│   ├── basics7_auto_recovery.py
-│   ├── intermediate1_non_realtime_joint_position_control.py
-│   ├── intermediate2_non_realtime_cartesian_pure_motion_control.py
-│   ├── intermediate3_non_realtime_cartesian_motion_force_control.py
-│   ├── intermediate4_teach_by_demonstration.py
-│   └── utility.py
+│   ├── basics1_display_robot_states.py
+│   ├── basics2_clear_fault.py
+│   ├── basics3_primitive_execution.py
+│   ├── basics4_plan_execution.py
+│   ├── basics5_zero_force_torque_sensors.py
+│   ├── basics6_gripper_control.py
+│   ├── basics7_auto_recovery.py
+│   ├── intermediate1_non_realtime_joint_position_control.py
+│   ├── intermediate2_non_realtime_cartesian_pure_motion_control.py
+│   ├── intermediate3_non_realtime_cartesian_motion_force_control.py
+│   ├── intermediate4_teach_by_demonstration.py
+│   └── utility.py
 ├── file_rdk.txt
 ├── include
 ├── lib
@@ -194,3 +195,4 @@ flexiv_ros2_ws
         ├── LICENSE
         ├── log
         └── README.md
+```
